@@ -177,7 +177,100 @@ let targetTemperature =
     }
 
     // MARK: - HTTP
+func setHeater(_ on: Bool, for device: MSpaDevice) async throws {
+    try await sendCommand(
+        ["heater_state": on ? 1 : 0],
+        to: device
+    )
+}
 
+func setFilter(_ on: Bool, for device: MSpaDevice) async throws {
+    try await sendCommand(
+        ["filter_state": on ? 1 : 0],
+        to: device
+    )
+}
+
+func setBubbles(_ on: Bool, for device: MSpaDevice) async throws {
+    try await sendCommand(
+        [
+            "bubble_state": on ? 1 : 0,
+            "bubble_level": 1
+        ],
+        to: device
+    )
+}
+
+func setJets(_ on: Bool, for device: MSpaDevice) async throws {
+    try await sendCommand(
+        ["jet_state": on ? 1 : 0],
+        to: device
+    )
+}
+
+func setUVC(_ on: Bool, for device: MSpaDevice) async throws {
+    try await sendCommand(
+        ["uvc_state": on ? 1 : 0],
+        to: device
+    )
+}
+
+func setTemperature(
+    _ temperature: Double,
+    for device: MSpaDevice
+) async throws {
+    let rawValue = Int((temperature * 2.0).rounded())
+
+    try await sendCommand(
+        ["temperature_setting": rawValue],
+        to: device
+    )
+}
+
+private func sendCommand(
+    _ desiredState: [String: Any],
+    to device: MSpaDevice
+) async throws {
+    let desired: [String: Any] = [
+        "state": [
+            "desired": desiredState
+        ]
+    ]
+
+    let desiredData = try JSONSerialization.data(
+        withJSONObject: desired
+    )
+
+    guard let desiredString = String(
+        data: desiredData,
+        encoding: .utf8
+    ) else {
+        throw MSpaError.invalidResponse
+    }
+
+    let body: [String: Any] = [
+        "device_id": device.id,
+        "product_id": device.productID,
+        "desired": desiredString
+    ]
+
+    let json = try await request(
+        path: "/api/device/command",
+        method: "POST",
+        body: body,
+        authenticated: true
+    )
+
+    let message = json["message"] as? String ?? ""
+
+    guard message.uppercased() == "SUCCESS" else {
+        throw MSpaError.api(
+            message.isEmpty
+                ? "Schaltbefehl wurde nicht bestätigt"
+                : message
+        )
+    }
+}
     private func request(
         path: String,
         method: String,
