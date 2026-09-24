@@ -158,17 +158,11 @@ actor MSpaClient {
         */
         let rawWater = doubleValue(data["water_temperature"])
 
-        let waterTemperature: Double?
-        if let rawWater {
-            waterTemperature = rawWater > 50
-                ? rawWater / 2.0
-                : rawWater
-        } else {
-            waterTemperature = nil
-        }
+     let waterTemperature =
+    doubleValue(data["water_temperature"]).map { $0 / 2.0 }
 
-        let targetTemperature =
-            doubleValue(data["temperature_setting"])
+let targetTemperature =
+    doubleValue(data["temperature_setting"]).map { $0 / 2.0 }
 
         return MSpaStatus(
             waterTemperature: waterTemperature,
