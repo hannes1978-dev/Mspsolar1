@@ -1,4 +1,4 @@
-um import SwiftUI
+import SwiftUI
 
 @MainActor
 final class EnergyVM: ObservableObject {
