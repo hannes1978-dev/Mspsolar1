@@ -33,7 +33,13 @@ final class EnergyVM: ObservableObject {
     private let sigenClient = SigenModbusClient()
     private let mspaClient = MSpaClient()
     private var mspaDevice: MSpaDevice?
+private var solarAvailableSince: Date?
+private var solarMissingSince: Date?
+private var automaticHeatingStartedAt: Date?
 
+private let solarStartDelay: TimeInterval = 180
+private let solarStopDelay: TimeInterval = 300
+private let minimumHeatingTime: TimeInterval = 600
    var solarPermit: Bool {
     guard let s = snapshot else { return false }
 
@@ -56,7 +62,55 @@ final class EnergyVM: ObservableObject {
            s.batterySOC >= minimumSOC &&
            s.pvKW >= requiredPVKW
 }
-    
+
+func updateSolarAutomationState() {
+    let now = Date()
+
+    if solarPermit {
+        solarMissingSince = nil
+
+        if solarAvailableSince == nil {
+            solarAvailableSince = now
+        }
+    } else {
+        solarAvailableSince = nil
+
+        if solarMissingSince == nil {
+            solarMissingSince = now
+        }
+    }
+}
+
+var solarStartReady: Bool {
+    guard
+        solarPermit,
+        let since = solarAvailableSince
+    else {
+        return false
+    }
+
+    return Date().timeIntervalSince(since) >= solarStartDelay
+}
+
+var solarStopReady: Bool {
+    guard
+        !solarPermit,
+        let missingSince = solarMissingSince
+    else {
+        return false
+    }
+
+    if let started = automaticHeatingStartedAt {
+        let runningTime = Date().timeIntervalSince(started)
+
+        if runningTime < minimumHeatingTime {
+            return false
+        }
+    }
+
+    return Date().timeIntervalSince(missingSince) >= solarStopDelay
+}
+
 
     func testSigen() async {
         status = "Verbinde mit 192.168.1.127:502 …"
@@ -66,6 +120,7 @@ final class EnergyVM: ObservableObject {
             snapshot = s
             connected = true
             status = "SigenStor verbunden"
+            updateSolarAutomationState()
         } catch {
             connected = false
             status = "Keine Verbindung: \(error.localizedDescription)"
