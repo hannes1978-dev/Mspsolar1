@@ -13,11 +13,7 @@ final class EnergyVM: ObservableObject {
     @Published var startHour = 9
     @Published var endHour = 17
 
-    @Published var heater = false
-    @Published var bubbles = false
-    @Published var jets = false
-
-    // MSpa
+    // MSpa Anmeldung und Status
     @Published var mspaEmail = ""
     @Published var mspaPassword = ""
     @Published var mspaStatus = "Nicht angemeldet"
@@ -32,6 +28,7 @@ final class EnergyVM: ObservableObject {
     @Published var mspaJets = false
     @Published var mspaUVC = false
     @Published var mspaOnline = false
+    @Published var commandRunning = false
 
     private let sigenClient = SigenModbusClient()
     private let mspaClient = MSpaClient()
@@ -42,7 +39,8 @@ final class EnergyVM: ObservableObject {
 
         let hour = Calendar.current.component(.hour, from: Date())
 
-        return hour >= startHour &&
+        return autoHeat &&
+               hour >= startHour &&
                hour < endHour &&
                s.exportKW >= threshold &&
                s.batterySOC >= minimumSOC
@@ -94,8 +92,6 @@ final class EnergyVM: ObservableObject {
             mspaDeviceName = device.name
             mspaModel = device.model
 
-            mspaStatus = "Lese Whirlpool-Status …"
-
             try await refreshMSpa()
 
             mspaConnected = true
@@ -131,6 +127,118 @@ final class EnergyVM: ObservableObject {
             mspaStatus = error.localizedDescription
         }
     }
+
+    private func runCommand(
+        _ text: String,
+        operation: () async throws -> Void
+    ) async {
+        guard !commandRunning else { return }
+
+        commandRunning = true
+        mspaStatus = text
+
+        do {
+            try await operation()
+
+            // Dem Whirlpool kurz Zeit geben,
+            // den neuen Zustand zu melden.
+            try await Task.sleep(for: .seconds(1))
+
+            try await refreshMSpa()
+            mspaStatus = "Befehl bestätigt"
+        } catch {
+            mspaStatus = error.localizedDescription
+
+            // Nach einem Fehler trotzdem versuchen,
+            // den tatsächlichen Zustand neu einzulesen.
+            try? await refreshMSpa()
+        }
+
+        commandRunning = false
+    }
+
+    func setHeater(_ on: Bool) async {
+        guard let device = mspaDevice else { return }
+
+        await runCommand(
+            on ? "Heizung wird eingeschaltet …"
+               : "Heizung wird ausgeschaltet …"
+        ) {
+            try await mspaClient.setHeater(
+                on,
+                for: device
+            )
+        }
+    }
+
+    func setFilter(_ on: Bool) async {
+        guard let device = mspaDevice else { return }
+
+        await runCommand(
+            on ? "Filter wird eingeschaltet …"
+               : "Filter wird ausgeschaltet …"
+        ) {
+            try await mspaClient.setFilter(
+                on,
+                for: device
+            )
+        }
+    }
+
+    func setBubbles(_ on: Bool) async {
+        guard let device = mspaDevice else { return }
+
+        await runCommand(
+            on ? "Blasen werden eingeschaltet …"
+               : "Blasen werden ausgeschaltet …"
+        ) {
+            try await mspaClient.setBubbles(
+                on,
+                for: device
+            )
+        }
+    }
+
+    func setJets(_ on: Bool) async {
+        guard let device = mspaDevice else { return }
+
+        await runCommand(
+            on ? "Jets werden eingeschaltet …"
+               : "Jets werden ausgeschaltet …"
+        ) {
+            try await mspaClient.setJets(
+                on,
+                for: device
+            )
+        }
+    }
+
+    func setUVC(_ on: Bool) async {
+        guard let device = mspaDevice else { return }
+
+        await runCommand(
+            on ? "UVC wird eingeschaltet …"
+               : "UVC wird ausgeschaltet …"
+        ) {
+            try await mspaClient.setUVC(
+                on,
+                for: device
+            )
+        }
+    }
+
+    func sendTargetTemperature() async {
+        guard let device = mspaDevice else { return }
+
+        await runCommand(
+            "Zieltemperatur wird eingestellt …"
+        ) {
+            try await mspaClient.setTemperature(
+                targetTemperature,
+                for: device
+            )
+        }
+    }
 }
 
 struct ContentView: View {
@@ -139,7 +247,6 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Form {
-
                 Section("MSpa Oslo") {
                     if !vm.mspaConnected {
                         TextField(
@@ -168,19 +275,15 @@ struct ContentView: View {
                     )
 
                     if vm.mspaConnected {
-                        if !vm.mspaDeviceName.isEmpty {
-                            LabeledContent(
-                                "Whirlpool",
-                                value: vm.mspaDeviceName
-                            )
-                        }
+                        LabeledContent(
+                            "Whirlpool",
+                            value: vm.mspaDeviceName
+                        )
 
-                        if !vm.mspaModel.isEmpty {
-                            LabeledContent(
-                                "Modell",
-                                value: vm.mspaModel
-                            )
-                        }
+                        LabeledContent(
+                            "Modell",
+                            value: vm.mspaModel
+                        )
 
                         LabeledContent(
                             "Cloud",
@@ -201,7 +304,7 @@ struct ContentView: View {
 
                         if let target = vm.mspaTargetTemperature {
                             LabeledContent(
-                                "MSpa Zieltemperatur",
+                                "Aktuelles Ziel",
                                 value: String(
                                     format: "%.1f °C",
                                     target
@@ -209,42 +312,105 @@ struct ContentView: View {
                             )
                         }
 
-                        LabeledContent(
+                        Toggle(
                             "Heizung",
-                            value: vm.mspaHeater ? "AN" : "AUS"
+                            isOn: Binding(
+                                get: { vm.mspaHeater },
+                                set: { newValue in
+                                    Task {
+                                        await vm.setHeater(newValue)
+                                    }
+                                }
+                            )
                         )
 
-                        LabeledContent(
+                        Toggle(
                             "Filter",
-                            value: vm.mspaFilter ? "AN" : "AUS"
+                            isOn: Binding(
+                                get: { vm.mspaFilter },
+                                set: { newValue in
+                                    Task {
+                                        await vm.setFilter(newValue)
+                                    }
+                                }
+                            )
                         )
 
-                        LabeledContent(
+                        Toggle(
                             "Blasen",
-                            value: vm.mspaBubbles ? "AN" : "AUS"
+                            isOn: Binding(
+                                get: { vm.mspaBubbles },
+                                set: { newValue in
+                                    Task {
+                                        await vm.setBubbles(newValue)
+                                    }
+                                }
+                            )
                         )
 
-                        LabeledContent(
-                            "Jets",
-                            value: vm.mspaJets ? "AN" : "AUS"
+                        Toggle(
+                            "Düsen / Jets",
+                            isOn: Binding(
+                                get: { vm.mspaJets },
+                                set: { newValue in
+                                    Task {
+                                        await vm.setJets(newValue)
+                                    }
+                                }
+                            )
                         )
 
-                        LabeledContent(
+                        Toggle(
                             "UVC",
-                            value: vm.mspaUVC ? "AN" : "AUS"
+                            isOn: Binding(
+                                get: { vm.mspaUVC },
+                                set: { newValue in
+                                    Task {
+                                        await vm.setUVC(newValue)
+                                    }
+                                }
+                            )
                         )
 
-                        Button("MSpa-Status aktualisieren") {
+                        .disabled(
+                            vm.commandRunning ||
+                            !vm.mspaOnline
+                        )
+
+                        HStack {
+                            Text("Zieltemperatur")
+                            Spacer()
+                            Text(
+                                String(
+                                    format: "%.1f °C",
+                                    vm.targetTemperature
+                                )
+                            )
+                        }
+
+                        Slider(
+                            value: $vm.targetTemperature,
+                            in: 30...40,
+                            step: 0.5
+                        )
+                        .disabled(vm.commandRunning)
+
+                        Button("Zieltemperatur übertragen") {
+                            Task {
+                                await vm.sendTargetTemperature()
+                            }
+                        }
+                        .disabled(
+                            vm.commandRunning ||
+                            !vm.mspaOnline
+                        )
+
+                        Button("Status aktualisieren") {
                             Task {
                                 await vm.refreshMSpaButton()
                             }
                         }
-
-                        Text(
-                            "Diese Testversion liest den Whirlpool nur aus. Sie sendet noch keine Schaltbefehle."
-                        )
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .disabled(vm.commandRunning)
                     }
                 }
 
@@ -305,46 +471,6 @@ struct ContentView: View {
                     }
                 }
 
-                Section("Whirlpool-Steuerung – Vorbereitung") {
-                    Toggle(
-                        "Heizung",
-                        isOn: $vm.heater
-                    )
-
-                    Toggle(
-                        "Blasen",
-                        isOn: $vm.bubbles
-                    )
-
-                    Toggle(
-                        "Düsen / Jets",
-                        isOn: $vm.jets
-                    )
-
-                    HStack {
-                        Text("Zieltemperatur")
-                        Spacer()
-                        Text(
-                            String(
-                                format: "%.1f °C",
-                                vm.targetTemperature
-                            )
-                        )
-                    }
-
-                    Slider(
-                        value: $vm.targetTemperature,
-                        in: 30...40,
-                        step: 0.5
-                    )
-
-                    Text(
-                        "Diese Schalter senden noch keine Befehle an den MSpa."
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                }
-
                 Section("PV-Heizautomatik") {
                     Toggle(
                         "Automatik",
@@ -396,6 +522,12 @@ struct ContentView: View {
                         "Heizfreigabe",
                         value: vm.solarPermit ? "JA" : "NEIN"
                     )
+
+                    Text(
+                        "Die PV-Automatik zeigt momentan nur die Freigabe an. Sie schaltet die Heizung noch nicht automatisch."
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
                 }
             }
             .navigationTitle("MSpa Solar")
