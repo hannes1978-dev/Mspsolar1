@@ -80,7 +80,41 @@ func updateSolarAutomationState() {
         }
     }
 }
+func runSolarHeatingAutomation() async {
+    updateSolarAutomationState()
 
+    guard solarStartReady else {
+        return
+    }
+
+    guard mspaConnected,
+          mspaOnline,
+          !mspaHeater,
+          !commandRunning,
+          let device = mspaDevice
+    else {
+        return
+    }
+
+    commandRunning = true
+    mspaStatus = "PV-Überschuss stabil – Heizung startet"
+
+    do {
+        try await mspaClient.setHeater(true, for: device)
+
+        automaticHeatingStartedAt = Date()
+        solarAvailableSince = nil
+
+        try await Task.sleep(for: .seconds(1))
+        await refreshMSpa()
+
+        mspaStatus = "Heizung automatisch mit PV gestartet"
+    } catch {
+        mspaStatus = "Automatik-Fehler: \(error.localizedDescription)"
+    }
+
+    commandRunning = false
+}
 var solarStartReady: Bool {
     guard
         solarPermit,
