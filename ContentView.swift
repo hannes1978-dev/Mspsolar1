@@ -34,17 +34,29 @@ final class EnergyVM: ObservableObject {
     private let mspaClient = MSpaClient()
     private var mspaDevice: MSpaDevice?
 
-    var solarPermit: Bool {
-        guard let s = snapshot else { return false }
+   var solarPermit: Bool {
+    guard let s = snapshot else { return false }
 
-        let hour = Calendar.current.component(.hour, from: Date())
+    let hour = Calendar.current.component(.hour, from: Date())
 
-        return autoHeat &&
-               hour >= startHour &&
-               hour < endHour &&
-               s.exportKW >= threshold &&
-               s.batterySOC >= minimumSOC
-    }
+    // Tatsächlicher Verbrauch, den die PV momentan versorgt.
+    // Positive Batterieleistung bedeutet: Batterie wird geladen.
+    let estimatedHouseKW = max(
+        0,
+        s.pvKW - s.batteryKW - s.exportKW + s.importKW
+    )
+
+    // Für den Whirlpool müssen zusätzlich etwa 2,2 kW
+    // Heizleistung aus der aktuellen PV-Erzeugung verfügbar sein.
+    let requiredPVKW = estimatedHouseKW + threshold
+
+    return autoHeat &&
+           hour >= startHour &&
+           hour < endHour &&
+           s.batterySOC >= minimumSOC &&
+           s.pvKW >= requiredPVKW
+}
+    
 
     func testSigen() async {
         status = "Verbinde mit 192.168.1.127:502 …"
