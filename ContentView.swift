@@ -1,4 +1,4 @@
-import SwiftUI
+um import SwiftUI
 
 @MainActor
 final class EnergyVM: ObservableObject {
@@ -106,7 +106,7 @@ func runSolarHeatingAutomation() async {
         solarAvailableSince = nil
 
         try await Task.sleep(for: .seconds(1))
-        await refreshMSpa()
+        try await refreshMSpa()()
 
         mspaStatus = "Heizung automatisch mit PV gestartet"
     } catch {
