@@ -178,8 +178,44 @@ let targetTemperature =
 
     // MARK: - HTTP
 func setHeater(_ on: Bool, for device: MSpaDevice) async throws {
+    if !on {
+        // Heizung zuerst sicher ausschalten.
+        try await sendCommand(
+            ["heater_state": 0],
+            to: device
+        )
+        return
+    }
+
+    // Vor dem Heizen aktuellen Zustand prüfen.
+    var status = try await getStatus(for: device)
+
+    if !status.online {
+        throw MSpaError.api("Whirlpool ist offline")
+    }
+
+    // Zum Heizen muss die Wasserzirkulation laufen.
+    if !status.filterOn {
+        try await sendCommand(
+            ["filter_state": 1],
+            to: device
+        )
+
+        // Dem MSpa Zeit geben, die Pumpe zu starten.
+        try await Task.sleep(for: .seconds(2))
+
+        status = try await getStatus(for: device)
+
+        guard status.filterOn else {
+            throw MSpaError.api(
+                "Filter/Wasserzirkulation konnte nicht gestartet werden"
+            )
+        }
+    }
+
+    // Erst jetzt die Heizung einschalten.
     try await sendCommand(
-        ["heater_state": on ? 1 : 0],
+        ["heater_state": 1],
         to: device
     )
 }
