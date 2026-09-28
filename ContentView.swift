@@ -106,7 +106,7 @@ func runSolarHeatingAutomation() async {
         solarAvailableSince = nil
 
         try await Task.sleep(for: .seconds(1))
-        try await refreshMSpa()()
+        try await refreshMSpa()
 
         mspaStatus = "Heizung automatisch mit PV gestartet"
     } catch {
