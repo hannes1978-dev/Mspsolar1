@@ -62,7 +62,7 @@ private let minimumHeatingTime: TimeInterval = 600
            s.batterySOC >= minimumSOC &&
            s.pvKW >= requiredPVKW
 }
-
+func updateSolarAutomationState() {
     let now = Date()
 
     if solarPermit {
