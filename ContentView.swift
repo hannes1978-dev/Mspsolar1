@@ -62,7 +62,6 @@ private let minimumHeatingTime: TimeInterval = 600
            s.batterySOC >= minimumSOC &&
            s.pvKW >= requiredPVKW
 }
-await runSolarHeatingAutomation()
 {
     let now = Date()
 
