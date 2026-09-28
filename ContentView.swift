@@ -173,7 +173,26 @@ var solarStopReady: Bool {
     return Date().timeIntervalSince(missingSince) >= solarStopDelay
 }
 
+func runAutomationCycle() async {
+    guard !commandRunning else { return }
 
+    do {
+        let s = try await sigenClient.readSnapshot()
+        snapshot = s
+        connected = true
+        status = "SigenStor verbunden"
+
+        updateSolarAutomationState()
+
+        if mspaConnected {
+            try await refreshMSpa()
+            await runSolarHeatingAutomation()
+        }
+    } catch {
+        connected = false
+        status = "Automatik: \(error.localizedDescription)"
+    }
+}
     func testSigen() async {
         status = "Verbinde mit 192.168.1.127:502 …"
 
