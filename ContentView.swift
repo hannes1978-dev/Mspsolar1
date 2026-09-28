@@ -82,15 +82,44 @@ func updateSolarAutomationState() {
 func runSolarHeatingAutomation() async {
     updateSolarAutomationState()
 
-    guard solarStartReady else {
+    guard mspaConnected,
+          mspaOnline,
+          !commandRunning,
+          let device = mspaDevice
+    else {
         return
     }
 
-    guard mspaConnected,
-          mspaOnline,
-          !mspaHeater,
-          !commandRunning,
-          let device = mspaDevice
+    // Automatisch gestartete Heizung wieder ausschalten,
+    // wenn die PV-Bedingungen lange genug nicht mehr erfüllt sind.
+    if mspaHeater,
+       automaticHeatingStartedAt != nil,
+       solarStopReady {
+
+        commandRunning = true
+        mspaStatus = "PV-Leistung zu niedrig – Heizung stoppt"
+
+        do {
+            try await mspaClient.setHeater(false, for: device)
+
+            automaticHeatingStartedAt = nil
+            solarMissingSince = nil
+
+            try await Task.sleep(for: .seconds(1))
+            try await refreshMSpa()
+
+            mspaStatus = "Heizung automatisch gestoppt"
+        } catch {
+            mspaStatus = "Automatik-Fehler: \(error.localizedDescription)"
+        }
+
+        commandRunning = false
+        return
+    }
+
+    // Einschalten nur nach stabiler PV-Freigabe.
+    guard solarStartReady,
+          !mspaHeater
     else {
         return
     }
@@ -114,7 +143,6 @@ func runSolarHeatingAutomation() async {
 
     commandRunning = false
 }
-
 var solarStartReady: Bool {
     guard
         solarPermit,
