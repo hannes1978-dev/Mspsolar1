@@ -695,6 +695,7 @@ struct ContentView: View {
             .navigationTitle("MSpa Solar")
             .task {
                 await vm.testSigen()
+                vm.startAutomationLoop()
             }
         }
     }
