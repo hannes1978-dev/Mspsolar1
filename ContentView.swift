@@ -2,6 +2,7 @@ import SwiftUI
 
 @MainActor
 final class EnergyVM: ObservableObject {
+    private var automationTask: Task<Void, Never>?
     @Published var snapshot: SigenSnapshot?
     @Published var status = "Noch nicht getestet"
     @Published var connected = false
@@ -172,7 +173,32 @@ var solarStopReady: Bool {
 
     return Date().timeIntervalSince(missingSince) >= solarStopDelay
 }
+func startAutomationLoop() {
+    guard automationTask == nil else { return }
 
+    automationTask = Task { [weak self] in
+        while !Task.isCancelled {
+            guard let self else { return }
+
+            await self.runAutomationCycle()
+
+            try? await Task.sleep(for: .seconds(15))
+        }
+    }
+}
+func startAutomationLoop() {
+    guard automationTask == nil else { return }
+
+    automationTask = Task { [weak self] in
+        while !Task.isCancelled {
+            guard let self else { return }
+
+            await self.runAutomationCycle()
+
+            try? await Task.sleep(for: .seconds(15))
+        }
+    }
+}
 func runAutomationCycle() async {
     guard !commandRunning else { return }
 
