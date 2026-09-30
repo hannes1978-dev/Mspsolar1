@@ -186,19 +186,7 @@ func startAutomationLoop() {
         }
     }
 }
-func startAutomationLoop() {
-    guard automationTask == nil else { return }
 
-    automationTask = Task { [weak self] in
-        while !Task.isCancelled {
-            guard let self else { return }
-
-            await self.runAutomationCycle()
-
-            try? await Task.sleep(for: .seconds(15))
-        }
-    }
-}
 func runAutomationCycle() async {
     guard !commandRunning else { return }
 
