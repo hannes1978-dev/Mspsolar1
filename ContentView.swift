@@ -276,7 +276,8 @@ func runAutomationCycle() async {
             mspaModel = device.model
 
             try await refreshMSpa()
-
+KeychainHelper.save(email, account: "mspaEmail")
+KeychainHelper.save(mspaPassword, account: "mspaPassword")
             mspaConnected = true
             mspaStatus = "MSpa verbunden"
         } catch {
