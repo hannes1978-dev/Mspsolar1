@@ -7,12 +7,12 @@ final class EnergyVM: ObservableObject {
     @Published var status = "Noch nicht getestet"
     @Published var connected = false
 
-    @Published var autoHeat = true
-    @Published var threshold = 2.5
-    @Published var minimumSOC = 80.0
-    @Published var targetTemperature = 39.5
-    @Published var startHour = 9
-    @Published var endHour = 17
+   @AppStorage("autoHeat") var autoHeat = true
+@AppStorage("threshold") var threshold = 2.5
+@AppStorage("minimumSOC") var minimumSOC = 80.0
+@AppStorage("targetTemperature") var targetTemperature = 39.5
+@AppStorage("startHour") var startHour = 9
+@AppStorage("endHour") var endHour = 17
 
     // MSpa Anmeldung und Status
     @Published var mspaEmail = ""
