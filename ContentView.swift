@@ -657,13 +657,13 @@ struct ContentView: View {
                         )
                     }
 
-                    Button("Modbus-Verbindung testen") {
-                       .task {
-    vm.loadSavedMSpaCredentials()
-    await vm.testSigen()
-    vm.startAutomationLoop()
-}
-                    }
+                    Button("Modbus-Verbindung testen", action: {
+    Task {
+        vm.loadSavedMSpaCredentials()
+        await vm.testSigen()
+        vm.startAutomationLoop()
+    }
+})
                 }
 
                 Section("PV-Heizautomatik") {
