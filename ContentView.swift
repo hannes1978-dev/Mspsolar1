@@ -157,18 +157,29 @@ var solarStartReady: Bool {
 
 var solarStopReady: Bool {
     guard
-        !solarPermit,
+        let s = snapshot,
         let missingSince = solarMissingSince
     else {
         return false
     }
 
+    // Eine automatisch gestartete Heizung soll mindestens
+    // die festgelegte Mindestzeit laufen.
     if let started = automaticHeatingStartedAt {
         let runningTime = Date().timeIntervalSince(started)
 
         if runningTime < minimumHeatingTime {
             return false
         }
+    }
+
+    // Während die Heizung läuft, ist fehlender PV-Überschuss
+    // normal, weil der Whirlpool selbst ca. 2,2 kW verbraucht.
+    // Deshalb stoppen wir erst bei tatsächlichem Netzbezug.
+    let excessiveGridImport = s.importKW >= 0.4
+
+    guard excessiveGridImport else {
+        return false
     }
 
     return Date().timeIntervalSince(missingSince) >= solarStopDelay
