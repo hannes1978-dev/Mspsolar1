@@ -701,10 +701,12 @@ struct ContentView: View {
                         step: 5
                     )
 
-                    LabeledContent(
-                        "Heizfreigabe",
-                        value: vm.solarPermit ? "JA" : "NEIN"
-                    )
+                  LabeledContent(
+    "PV-Status",
+    value: vm.mspaHeater
+        ? "Heizung aktiv"
+        : (vm.solarPermit ? "PV-Heizen möglich" : "Warte auf PV")
+)
 
                     Text(
                         "Die PV-Automatik zeigt momentan nur die Freigabe an. Sie schaltet die Heizung noch nicht automatisch."
