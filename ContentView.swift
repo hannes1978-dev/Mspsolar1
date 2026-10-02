@@ -41,6 +41,15 @@ private var automaticHeatingStartedAt: Date?
 private let solarStartDelay: TimeInterval = 180
 private let solarStopDelay: TimeInterval = 300
 private let minimumHeatingTime: TimeInterval = 600
+func loadSavedMSpaCredentials() {
+    if let email = KeychainHelper.load(account: "mspaEmail") {
+        mspaEmail = email
+    }
+
+    if let password = KeychainHelper.load(account: "mspaPassword") {
+        mspaPassword = password
+    }
+}
    var solarPermit: Bool {
     guard let s = snapshot else { return false }
 
