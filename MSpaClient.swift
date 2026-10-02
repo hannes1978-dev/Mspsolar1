@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import Security
 
 struct MSpaDevice: Identifiable, Sendable {
     let id: String
