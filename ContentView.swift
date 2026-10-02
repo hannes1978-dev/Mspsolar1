@@ -193,17 +193,7 @@ var solarStopReady: Bool {
     return Date().timeIntervalSince(missingSince) >= solarStopDelay
 }
 
-    // Während die Heizung läuft, ist fehlender PV-Überschuss
-    // normal, weil der Whirlpool selbst ca. 2,2 kW verbraucht.
-    // Deshalb stoppen wir erst bei tatsächlichem Netzbezug.
-    let excessiveGridImport = s.importKW >= 0.4
-
-    guard excessiveGridImport else {
-        return false
-    }
-
-    return Date().timeIntervalSince(missingSince) >= solarStopDelay
-}
+ 
 func startAutomationLoop() {
     guard automationTask == nil else { return }
 
