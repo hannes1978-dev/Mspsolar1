@@ -658,9 +658,11 @@ struct ContentView: View {
                     }
 
                     Button("Modbus-Verbindung testen") {
-                        Task {
-                            await vm.testSigen()
-                        }
+                       .task {
+    vm.loadSavedMSpaCredentials()
+    await vm.testSigen()
+    vm.startAutomationLoop()
+}
                     }
                 }
 
