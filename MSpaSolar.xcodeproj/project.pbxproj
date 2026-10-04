@@ -7,10 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A10000000000000000000001 /* MSpaSolarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* MSpaSolarApp.swift */; };
+		A10000000000000000000001 /* 
+A10000000000000000000005 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* KeychainHelper.swift */; };
+MSpaSolarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* MSpaSolarApp.swift */; };
 		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
 		A10000000000000000000003 /* SigenModbusClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* SigenModbusClient.swift */; };
 A10000000000000000000004 /* MSpaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* MSpaClient.swift */; };
+A10000000000000000000005 /* KeychainHelper.swift in Sources */,
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,7 +22,8 @@ A10000000000000000000004 /* MSpaClient.swift in Sources */ = {isa = PBXBuildFile
 		A20000000000000000000003 /* SigenModbusClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigenModbusClient.swift; sourceTree = "<group>"; };
 		A20000000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A20000000000000000000005 /* MSpaSolar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSpaSolar.app; sourceTree = BUILT_PRODUCTS_DIR; };
-B10000000000000000000004 /* MSpaClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSpaClient.swift; sourceTree = "<group>"; };
+a
+MSpaClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MSpaClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +135,7 @@ A10000000000000000000004 /* MSpaClient.swift in Sources */,
 
 /* Begin XCBuildConfiguration section */
 		B10000000000000000000001 /* Debug */ = {
+B10000000000000000000005 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
