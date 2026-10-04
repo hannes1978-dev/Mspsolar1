@@ -723,7 +723,7 @@ struct ContentView: View {
                     Text(
     "Die PV-Automatik steuert die Heizung automatisch, solange die App aktiv ist. Kurze PV-Schwankungen werden durch Ein- und Ausschaltverzögerungen abgefangen."
 )
-                    )
+                  
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 }
