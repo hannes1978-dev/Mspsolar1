@@ -721,7 +721,8 @@ struct ContentView: View {
 )
 
                     Text(
-                        "Die PV-Automatik zeigt momentan nur die Freigabe an. Sie schaltet die Heizung noch nicht automatisch."
+    "Die PV-Automatik steuert die Heizung automatisch, solange die App aktiv ist. Kurze PV-Schwankungen werden durch Ein- und Ausschaltverzögerungen abgefangen."
+)
                     )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
