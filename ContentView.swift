@@ -118,7 +118,8 @@ if mspaHeater,
             try await mspaClient.setHeater(false, for: device)
 
             automaticHeatingStartedAt = nil
-            solarMissingSince = nil
+automaticHeatingStoppedAt = Date()
+solarMissingSince = nil
 
             try await Task.sleep(for: .seconds(1))
             try await refreshMSpa()
