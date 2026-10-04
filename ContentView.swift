@@ -134,6 +134,10 @@ solarMissingSince = nil
     }
 
     // Einschalten nur nach stabiler PV-Freigabe.
+   if let stoppedAt = automaticHeatingStoppedAt,
+   Date().timeIntervalSince(stoppedAt) < restartDelay {
+    return
+}
 guard solarStartReady,
       !mspaHeater,
       let waterTemperature,
