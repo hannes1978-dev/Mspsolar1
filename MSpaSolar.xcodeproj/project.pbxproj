@@ -136,7 +136,7 @@ A10000000000000000000005 /* KeychainHelper.swift in Sources */,
 
 /* Begin XCBuildConfiguration section */
 		B10000000000000000000001 /* Debug */ = {
-B10000000000000000000005 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
