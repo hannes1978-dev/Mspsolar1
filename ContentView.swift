@@ -128,11 +128,13 @@ func runSolarHeatingAutomation() async {
     }
 
     // Einschalten nur nach stabiler PV-Freigabe.
-    guard solarStartReady,
-          !mspaHeater
-    else {
-        return
-    }
+guard solarStartReady,
+      !mspaHeater,
+      let waterTemperature,
+      waterTemperature < targetTemperature
+else {
+    return
+}
 
     commandRunning = true
     mspaStatus = "PV-Überschuss stabil – Heizung startet"
