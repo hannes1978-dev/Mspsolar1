@@ -100,11 +100,15 @@ func runSolarHeatingAutomation() async {
         return
     }
 
-    // Automatisch gestartete Heizung wieder ausschalten,
-    // wenn die PV-Bedingungen lange genug nicht mehr erfüllt sind.
-    if mspaHeater,
-       automaticHeatingStartedAt != nil,
-       solarStopReady {
+// Automatisch gestartete Heizung ausschalten,
+// wenn die Zieltemperatur erreicht ist
+// ODER die PV-Bedingungen nicht mehr erfüllt sind.
+let targetReached =
+    waterTemperature.map { $0 >= targetTemperature } ?? false
+
+if mspaHeater,
+   automaticHeatingStartedAt != nil,
+   (targetReached || solarStopReady) {
 
         commandRunning = true
         mspaStatus = "PV-Leistung zu niedrig – Heizung stoppt"
