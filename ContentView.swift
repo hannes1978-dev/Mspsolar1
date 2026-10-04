@@ -37,10 +37,11 @@ final class EnergyVM: ObservableObject {
 private var solarAvailableSince: Date?
 private var solarMissingSince: Date?
 private var automaticHeatingStartedAt: Date?
-
+private var automaticHeatingStoppedAt: Date?
 private let solarStartDelay: TimeInterval = 180
 private let solarStopDelay: TimeInterval = 300
 private let minimumHeatingTime: TimeInterval = 600
+private let restartDelay: TimeInterval = 300
 func loadSavedMSpaCredentials() {
     if let email = KeychainHelper.load(account: "mspaEmail") {
         mspaEmail = email
