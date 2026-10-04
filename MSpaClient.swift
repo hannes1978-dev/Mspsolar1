@@ -291,24 +291,7 @@ func setFilter(_ on: Bool, for device: MSpaDevice) async throws {
         to: device
     )
 }
-    if !on {
-        let status = try await getStatus(for: device)
 
-        if status.heaterOn {
-            try await sendCommand(
-                ["heater_state": 0],
-                to: device
-            )
-
-            try await Task.sleep(for: .seconds(1))
-        }
-    }
-
-    try await sendCommand(
-        ["filter_state": on ? 1 : 0],
-        to: device
-    )
-}
 
 func setBubbles(_ on: Bool, for device: MSpaDevice) async throws {
     try await sendCommand(
