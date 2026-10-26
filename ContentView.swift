@@ -112,7 +112,9 @@ if mspaHeater,
    (targetReached || solarStopReady) {
 
         commandRunning = true
-        mspaStatus = "PV-Leistung zu niedrig – Heizung stoppt"
+mspaStatus = targetReached
+    ? "Zieltemperatur erreicht – Heizung stoppt"
+    : "PV-Leistung zu niedrig – Heizung stoppt"
 
         do {
             try await mspaClient.setHeater(false, for: device)
