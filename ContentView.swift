@@ -246,10 +246,7 @@ func runAutomationCycle() async {
             try await refreshMSpa()
             await runSolarHeatingAutomation()
         }
-    } catch {
        } catch {
-    status = "Automatik: \(error.localizedDescription)"
-}
         status = "Automatik: \(error.localizedDescription)"
     }
 }
