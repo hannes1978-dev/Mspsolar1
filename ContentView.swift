@@ -247,7 +247,9 @@ func runAutomationCycle() async {
             await runSolarHeatingAutomation()
         }
     } catch {
-        connected = false
+       } catch {
+    status = "Automatik: \(error.localizedDescription)"
+}
         status = "Automatik: \(error.localizedDescription)"
     }
 }
