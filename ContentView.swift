@@ -260,7 +260,6 @@ func runAutomationCycle() async {
             status = "SigenStor verbunden"
             updateSolarAutomationState()
         } catch {
-            connected = false
             status = "Keine Verbindung: \(error.localizedDescription)"
         }
     }
