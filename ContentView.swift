@@ -236,6 +236,16 @@ func runAutomationCycle() async {
 
     do {
         let s = try await sigenClient.readSnapshot()
+      guard s.pvKW >= 0,
+      s.pvKW <= 25,
+      s.batterySOC >= 0,
+      s.batterySOC <= 100,
+      abs(s.gridKW) <= 30,
+      abs(s.batteryKW) <= 30
+else {
+    status = "SigenStor: unplausible Messwerte"
+    return
+}
         snapshot = s
         connected = true
         status = "SigenStor verbunden"
