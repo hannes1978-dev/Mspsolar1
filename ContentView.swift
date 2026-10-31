@@ -243,6 +243,8 @@ func runAutomationCycle() async {
       abs(s.gridKW) <= 30,
       abs(s.batteryKW) <= 30
 else {
+    snapshot = nil
+    connected = false
     status = "SigenStor: unplausible Messwerte"
     return
 }
