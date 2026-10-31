@@ -270,36 +270,6 @@ func runAutomationCycle() async {
         mspaStatus = "MSpa: \(error.localizedDescription)"
     }
 }
-    guard !commandRunning else { return }
-
-    do {
-        let s = try await sigenClient.readSnapshot()
-      guard s.pvKW >= 0,
-      s.pvKW <= 25,
-      s.batterySOC >= 0,
-      s.batterySOC <= 100,
-      abs(s.gridKW) <= 30,
-      abs(s.batteryKW) <= 30
-else {
-    snapshot = nil
-    connected = false
-    status = "SigenStor: unplausible Messwerte"
-    return
-}
-        snapshot = s
-        connected = true
-        status = "SigenStor verbunden"
-
-        updateSolarAutomationState()
-
-        if mspaConnected {
-            try await refreshMSpa()
-            await runSolarHeatingAutomation()
-        }
-       } catch {
-        status = "Automatik: \(error.localizedDescription)"
-    }
-}
     func testSigen() async {
         status = "Verbinde mit 192.168.1.127:502 …"
 
